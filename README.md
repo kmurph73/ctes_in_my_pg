@@ -68,7 +68,7 @@ PRs for `from_cte` support are of course welcome however
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ctes_in_my_pg', github: 'https://github.com/shmay/ctes_in_my_pg'
+gem 'ctes_in_my_pg', github: 'shmay/ctes_in_my_pg'
 ```
 
 And then execute:
