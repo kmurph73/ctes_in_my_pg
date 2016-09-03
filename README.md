@@ -61,6 +61,8 @@ Graph.with.recursive(search_graph:
 
 no support for postgre_ext's [from_cte](https://github.com/DockYard/postgres_ext/blob/master/docs/querying.md#from_cte) because I couldn't get it working and I don't really see the point of it anyway
 
+PRs for `from_cte` support are of course welcome however
+
 ## Installation
 
 Add this line to your application's Gemfile:
