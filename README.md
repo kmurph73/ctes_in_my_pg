@@ -1,15 +1,70 @@
 # CtesInMyPg
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ctes_in_my_pg`. To experiment with that code, run `bin/console` for an interactive prompt.
+[postgres_ext][1], a great gem, does not support Rails 5 yet.  
 
-TODO: Delete this and the text above, and describe your gem
+Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code for that and put it in a separate gem to get CTEs working with Rails 5.
+
+***All credit goes to [Dan McClain][3] and the postgres_ext contributors*** ... I just stole the code
+
+[1]: https://github.com/DockYard/postgres_ext
+[2]: https://www.postgresql.org/docs/current/static/queries-with.html
+[3]: https://github.com/danmcclain
+
+# Common Table Expressions (CTEs)
+
+ctes_in_my_pg adds CTE expression support to ActiveRecord via:
+
+  * [`Relation#with`](#with)
+
+## with
+
+We can add CTEs to queries by chaining `#with` off a relation.
+`Relation#with` accepts a hash, and will convert `Relation`s to the
+proper SQL in the CTE.
+
+Let's expand a `#with` call to its resulting SQL code:
+
+```ruby
+Score.with(my_games: Game.where(id: 1)).joins('JOIN my_games ON scores.game_id = my_games.id')
+```
+
+The following will be generated when that relation is evaluated:
+
+```SQL
+WITH my_games AS (
+SELECT games.*
+FROM games
+WHERE games.id = 1
+)
+SELECT *
+FROM scores
+JOIN my_games
+ON scores.games_id = my_games.id
+```
+
+You can also do a recursive with:
+
+```ruby
+Graph.with.recursive(search_graph:
+  "  SELECT g.id, g.link, g.data, 1 AS depth
+     FROM graph g
+   UNION ALL
+     SELECT g.id, g.link, g.data, sg.depth + 1
+     FROM graph g, search_graph sg
+     WHERE g.id = sg.link").from(:search_graph)
+```
+  * [`Model.from_cte`](#from_cte)
+
+## no Model.from_cte
+
+no support for postgre_ext's [from_cte](https://github.com/DockYard/postgres_ext/blob/master/docs/querying.md#from_cte) because I couldn't get it working and I don't really see the point of it anyway
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ctes_in_my_pg'
+gem 'ctes_in_my_pg', github: 'https://github.com/shmay/ctes_in_my_pg'
 ```
 
 And then execute:
@@ -26,14 +81,17 @@ TODO: Write usage instructions here
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. 
+
+To run the tests, create a PG db then put `DATABASE_URL="postgres://[YOUR_USERNAME]:@localhost/somedb"` in .env.  Then run `bundle exec rake db:migrate`.
+
+Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ctes_in_my_pg.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/shmay/ctes_in_my_pg.
 
 ## License
 
