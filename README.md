@@ -2,9 +2,11 @@
 
 [postgres_ext][1], a great gem, does not support Rails 5 yet.  
 
-Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code for that and put it in a separate gem to get CTEs working with Rails 5.
+Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code for that and put it in a separate gem to get CTEs working with Rails & ActiveRecord 5.
 
 ***All credit goes to [Dan McClain][3] and the postgres_ext contributors*** ... I just stole the code
+
+As of today, it only works with Rails 5 afaik.  If you want CTE support below that, use the postgres_ext gem.
 
 [1]: https://github.com/DockYard/postgres_ext
 [2]: https://www.postgresql.org/docs/current/static/queries-with.html
@@ -74,10 +76,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install ctes_in_my_pg
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
