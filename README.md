@@ -6,7 +6,7 @@ Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code fo
 
 ***All credit goes to [Dan McClain][3] and the postgres_ext contributors*** ... I just stole the code
 
-As of today, it only works with Rails 5 afaik.  If you want CTE support below that, use the postgres_ext gem.
+It works with Rails 5 for sure ... tbd on other versions.  If you want guaranteed CTE support below that, use the postgres_ext gem.
 
 [1]: https://github.com/DockYard/postgres_ext
 [2]: https://www.postgresql.org/docs/current/static/queries-with.html
