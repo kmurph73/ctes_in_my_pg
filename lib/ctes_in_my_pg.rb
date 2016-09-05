@@ -32,30 +32,22 @@ module ActiveRecord
       end
     end
 
-    [:with].each do |name|
-      class_eval <<-CODE, __FILE__, __LINE__ + 1
-       def #{name}_values                   # def select_values
-         @values[:#{name}] || []            #   @values[:select] || []
-       end                                  # end
-                                            #
-       def #{name}_values=(values)          # def select_values=(values)
-         raise ImmutableRelation if @loaded #   raise ImmutableRelation if @loaded
-         @values[:#{name}] = values         #   @values[:select] = values
-       end                                  # end
-      CODE
+    def with_values
+      @values[:with] || []
     end
 
-    [:recursive].each do |name|
-      class_eval <<-CODE, __FILE__, __LINE__ + 1
-        def #{name}_value=(value)            # def readonly_value=(value)
-          raise ImmutableRelation if @loaded #   raise ImmutableRelation if @loaded
-          @values[:#{name}] = value          #   @values[:readonly] = value
-        end                                  # end
+    def with_values=(values)
+      raise ImmutableRelation if @loaded
+      @values[:with] = values
+    end
 
-        def #{name}_value                    # def readonly_value
-          @values[:#{name}]                  #   @values[:readonly]
-        end                                  # end
-      CODE
+    def recursive_value=(value)
+      raise ImmutableRelation if @loaded
+      @values[:recursive] = value
+    end
+
+    def recursive_value
+      @values[:recursive]
     end
 
     def with(opts = :chain, *rest)
@@ -78,10 +70,10 @@ module ActiveRecord
 
     end
 
-    def build_arel_with_extensions
-      arel = build_arel_without_extensions
+    def build_arel
+      arel = super()
 
-      build_with(arel)
+      build_with(arel) if @values[:with]
 
       arel
     end
@@ -115,6 +107,8 @@ module ActiveRecord
       end
     end
 
-    alias_method_chain :build_arel, :extensions
+    #alias_method_chain :build_arel, :extensions
+    # use method overriding, not alias_method_chain, as per Yehuda:
+    # http://yehudakatz.com/2009/03/06/alias_method_chain-in-models/
   end
 end
