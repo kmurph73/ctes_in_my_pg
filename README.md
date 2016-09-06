@@ -4,7 +4,7 @@
 
 Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code for that and put it in a separate gem to get CTEs working with Rails & ActiveRecord 5.
 
-***All credit goes to [Dan McClain][3] and the postgres_ext contributors*** ... I just stole the code
+***All credit goes to [Dan McClain][3] and the postgres_ext contributors*** ... I just stole the code ... though I did remove `alias_method_chain`!
 
 It works with Rails 5 for sure ... tbd on other versions.  If you want guaranteed CTE support below that, use the postgres_ext gem.
 
