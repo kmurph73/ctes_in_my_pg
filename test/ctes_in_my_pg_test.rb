@@ -29,6 +29,11 @@ describe 'Common Table Expression queries' do
       query = Person.with(testing: arel_manager)
       query.to_sql.must_equal 'WITH "testing" AS (SELECT "test"."foo" FROM "test") SELECT "people".* FROM "people"'
     end
+
+    it 'correctly quotes the identifiers' do
+        query = Person.with( '"DROP DATABASE test;' => Person.where(lucky_number: 7))
+        query.to_sql.must_equal 'WITH """DROP DATABASE test;" AS (SELECT "people".* FROM "people" WHERE "people"."lucky_number" = 7) SELECT "people".* FROM "people"'
+    end
   end
 
   describe '.with(common_table_exression_arel_nodes_as)' do

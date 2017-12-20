@@ -91,7 +91,7 @@ module ActiveRecord
             when ActiveRecord::Relation, Arel::SelectManager
               select = Arel::Nodes::SqlLiteral.new "(#{expression.to_sql})"
             end
-            Arel::Nodes::As.new Arel::Nodes::SqlLiteral.new("\"#{name.to_s}\""), select
+            Arel::Nodes::As.new Arel::Nodes::SqlLiteral.new(PG::Connection.quote_ident(name.to_s)), select
           end
         when Arel::Nodes::As
           with_value
