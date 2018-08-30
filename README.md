@@ -8,12 +8,12 @@ Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code fo
 
 It works with Rails 5 & 5.1 for sure.  If you want guaranteed CTE support below that, use the postgres_ext gem.
 
-**Rails 5.2 support is on the `rails-5-2-0` branch.**  `ActiveRecord::Relation#build_arel`'s [arity changed in Rails 5.2.0](https://github.com/shmay/ctes_in_my_pg/issues/2), breaking this gem.
+**Rails 5.2 support is on the `rails-5-2-0` branch.**  `ActiveRecord::Relation#build_arel`'s [arity changed in Rails 5.2.0](https://github.com/kmurph73/ctes_in_my_pg/issues/2), breaking this gem.
 
 If you're using Rails 5.2, please install via: 
 
 ```ruby
-gem 'ctes_in_my_pg', github: 'shmay/ctes_in_my_pg', branch: 'rails-5-2-0'
+gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg', branch: 'rails-5-2-0'
 ```
 
 [1]: https://github.com/DockYard/postgres_ext
@@ -76,13 +76,13 @@ PRs for `from_cte` support are of course welcome however
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ctes_in_my_pg', github: 'shmay/ctes_in_my_pg'
+gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg'
 ```
 
 For Rails 5.2+:
 
 ``` ruby
-gem 'ctes_in_my_pg', github: 'shmay/ctes_in_my_pg', branch: 'rails-5-2-0'
+gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg', branch: 'rails-5-2-0'
 ```
 
 And then execute:
@@ -105,7 +105,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/shmay/ctes_in_my_pg.
+Bug reports and pull requests are welcome on GitHub at https://github.com/kmurph73/ctes_in_my_pg.
 
 ## License
 
