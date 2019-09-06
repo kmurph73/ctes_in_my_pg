@@ -35,7 +35,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'pg'
   spec.add_dependency 'activerecord', '>= 5.2.0'
-  spec.add_dependency 'arel', '>= 7.0.0'
 
   spec.add_development_dependency 'm'
   spec.add_development_dependency 'database_cleaner'
