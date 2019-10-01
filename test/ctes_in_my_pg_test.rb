@@ -22,6 +22,74 @@ describe 'Common Table Expression queries' do
       _(query.to_sql).must_match(/WITH RECURSIVE "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
     end
 
+    describe 'PostgreSQL server supports materialization specifiers' do
+      it 'generates an expression with materialized' do
+        query = Person.with.materialized(lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+        _(query.to_sql).must_match(/WITH "lucky_number_seven" AS MATERIALIZED \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+      end
+
+      it 'generates an expression with a mix of materializeds' do
+        query = Person.with(lucky_number_seven: Person.where(lucky_number: 7)).with.materialized(another_lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+        _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\), "another_lucky_number_seven" AS MATERIALIZED \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+      end
+
+      it 'generates an expression with not_materialized' do
+        query = Person.with.not_materialized(lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+        _(query.to_sql).must_match(/WITH "lucky_number_seven" AS NOT MATERIALIZED \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+      end
+
+      it 'generates an expression with a mix of not_materializeds' do
+        query = Person.with(lucky_number_seven: Person.where(lucky_number: 7)).with.not_materialized(another_lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+        _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\), "another_lucky_number_seven" AS NOT MATERIALIZED \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+      end
+
+      it 'generates an expression with a mix of materializeds and not_materializeds' do
+        query = Person.with.materialized(lucky_number_seven: Person.where(lucky_number: 7)).with.not_materialized(another_lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+        _(query.to_sql).must_match(/WITH "lucky_number_seven" AS MATERIALIZED \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\), "another_lucky_number_seven" AS NOT MATERIALIZED \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+      end
+    end
+
+    describe 'PostgreSQL server does not support materialization specifiers' do
+      def without_materialization_specifiers(&block)
+        CtesInMyPg.stub(:supports_materialization_specifiers?, false, &block)
+      end
+
+      it 'generates an expression with materialized' do
+          without_materialization_specifiers do
+            query = Person.with.materialized(lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+            _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+          end
+      end
+
+      it 'generates an expression with a mix of materializeds' do
+        without_materialization_specifiers do
+          query = Person.with(lucky_number_seven: Person.where(lucky_number: 7)).with.materialized(another_lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+          _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\), "another_lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+        end
+      end
+
+      it 'generates an expression with not_materialized' do
+        without_materialization_specifiers do
+          query = Person.with.not_materialized(lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+          _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+        end
+      end
+
+      it 'generates an expression with a mix of not_materializeds' do
+        without_materialization_specifiers do
+          query = Person.with(lucky_number_seven: Person.where(lucky_number: 7)).with.not_materialized(another_lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+          _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\), "another_lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+        end
+      end
+
+      it 'generates an expression with a mix of materializeds and not_materializeds' do
+        without_materialization_specifiers do
+          query = Person.with.materialized(lucky_number_seven: Person.where(lucky_number: 7)).with.not_materialized(another_lucky_number_seven: Person.where(lucky_number: 7)).joins('JOIN lucky_number_seven ON lucky_number_seven.id = people.id')
+          _(query.to_sql).must_match(/WITH "lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\), "another_lucky_number_seven" AS \(SELECT "people".* FROM "people"(\s+)WHERE "people"."lucky_number" = 7\) SELECT "people".* FROM "people" JOIN lucky_number_seven ON lucky_number_seven.id = people.id/)
+        end
+      end
+    end
+
     it 'accepts Arel::SelectMangers' do
       arel_table = Arel::Table.new 'test'
       arel_manager = arel_table.project arel_table[:foo]
