@@ -1,6 +1,16 @@
 require "ctes_in_my_pg/version"
 #require 'byebug'
 
+module CtesInMyPg
+  class << self
+    def supports_materialization_specifiers?
+      return @supports_materialization_specifiers if defined?(@supports_materialization_specifiers)
+
+      @supports_materialization_specifiers = ActiveRecord::Base.connection.postgresql_version >= 120000
+    end
+  end
+end
+
 module ActiveRecord
   class Relation
     class Merger # :nodoc:
@@ -30,6 +40,20 @@ module ActiveRecord
         @scope.recursive_value = true
         @scope
       end
+
+      # Returns a new relation expressing WITH foo AS MATERIALIZED
+      def materialized(*args)
+        @scope.with_values += args
+        @scope.materialized_values += args
+        @scope
+      end
+
+      # Returns a new relation expressing WITH foo AS NOT MATERIALIZED
+      def not_materialized(*args)
+        @scope.with_values += args
+        @scope.not_materialized_values += args
+        @scope
+      end
     end
 
     def with_values
@@ -48,6 +72,24 @@ module ActiveRecord
 
     def recursive_value
       @values[:recursive]
+    end
+
+    def materialized_values
+      @values[:materialized_values] || []
+    end
+
+    def materialized_values=(values)
+      raise ImmutableRelation if @loaded
+      @values[:materialized_values] = values
+    end
+
+    def not_materialized_values
+      @values[:not_materialized_values] || []
+    end
+
+    def not_materialized_values=(values)
+      raise ImmutableRelation if @loaded
+      @values[:not_materialized_values] = values
     end
 
     def with(opts = :chain, *rest)
@@ -70,45 +112,62 @@ module ActiveRecord
 
     end
 
-    def build_arel(aliases)
-      arel = super(aliases)
+    private
 
-      build_with(arel) if @values[:with]
+      def build_arel(aliases)
+        arel = super(aliases)
 
-      arel
-    end
+        build_with(arel) if @values[:with]
 
-    def build_with(arel)
-      with_statements = with_values.flat_map do |with_value|
-        case with_value
-        when String
-          with_value
-        when Hash
-          with_value.map  do |name, expression|
-            case expression
-            when String
-              select = Arel::Nodes::SqlLiteral.new "(#{expression})"
-            when ActiveRecord::Relation, Arel::SelectManager
-              select = Arel::Nodes::SqlLiteral.new "(#{expression.to_sql})"
+        arel
+      end
+
+      def build_materialization(with_value)
+        return unless CtesInMyPg.supports_materialization_specifiers?
+
+        if materialized_values.include?(with_value)
+          'MATERIALIZED'
+        elsif not_materialized_values.include?(with_value)
+          'NOT MATERIALIZED'
+        end
+      end
+
+      def build_expression(with_value, expression)
+        [build_materialization(with_value), "(#{expression})"].compact.join(' ')
+      end
+
+      def build_with(arel)
+        with_statements = with_values.flat_map do |with_value|
+          case with_value
+          when String
+            with_value
+          when Hash
+            with_value.map  do |name, expression|
+              case expression
+              when String
+                select = Arel::Nodes::SqlLiteral.new build_expression(with_value, expression)
+              when ActiveRecord::Relation, Arel::SelectManager
+                select = Arel::Nodes::SqlLiteral.new build_expression(with_value, expression.to_sql)
+              end
+
+              Arel::Nodes::As.new Arel::Nodes::SqlLiteral.new(PG::Connection.quote_ident(name.to_s)), select
             end
-            Arel::Nodes::As.new Arel::Nodes::SqlLiteral.new(PG::Connection.quote_ident(name.to_s)), select
+          when Arel::Nodes::As
+            with_value
           end
-        when Arel::Nodes::As
-          with_value
+        end
+
+        unless with_statements.empty?
+          if recursive_value
+            arel.with :recursive, with_statements
+          else
+            arel.with with_statements
+          end
         end
       end
 
-      unless with_statements.empty?
-        if recursive_value
-          arel.with :recursive, with_statements
-        else
-          arel.with with_statements
-        end
-      end
-    end
-
-    #alias_method_chain :build_arel, :extensions
-    # use method overriding, not alias_method_chain, as per Yehuda:
-    # http://yehudakatz.com/2009/03/06/alias_method_chain-in-models/
+      #alias_method_chain :build_arel, :extensions
+      # use method overriding, not alias_method_chain, as per Yehuda:
+      # http://yehudakatz.com/2009/03/06/alias_method_chain-in-models/
   end
 end
