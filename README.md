@@ -89,7 +89,7 @@ And then execute:
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. 
+After checking out the repo, run `bin/setup` to install dependencies.
 
 To run the tests, create a PG db then put `DATABASE_URL="postgres://[YOUR_USERNAME]:@localhost/somedb"` in .env.  Then run `bundle exec rake db:migrate`.
 

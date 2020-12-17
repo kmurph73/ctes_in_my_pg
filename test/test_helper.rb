@@ -8,7 +8,7 @@ require 'minitest/autorun'
 require 'bourne'
 require 'database_cleaner'
 
-require 'byebug'
+require 'pry'
 
 require 'dotenv'
 Dotenv.load

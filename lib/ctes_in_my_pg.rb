@@ -9,6 +9,12 @@ module CtesInMyPg
       @supports_materialization_specifiers = ActiveRecord::Base.connection.postgresql_version >= 120000
     end
   end
+
+  class SqlLiteral < Arel::Nodes::SqlLiteral
+    def name
+      self.to_s
+    end
+  end
 end
 
 module ActiveRecord
@@ -109,7 +115,6 @@ module ActiveRecord
         self.with_values += [opts] + rest
         self
       end
-
     end
 
     private
@@ -145,12 +150,12 @@ module ActiveRecord
             with_value.map  do |name, expression|
               case expression
               when String
-                select = Arel::Nodes::SqlLiteral.new build_expression(with_value, expression)
+                select = CtesInMyPg::SqlLiteral.new build_expression(with_value, expression)
               when ActiveRecord::Relation, Arel::SelectManager
-                select = Arel::Nodes::SqlLiteral.new build_expression(with_value, expression.to_sql)
+                select = CtesInMyPg::SqlLiteral.new build_expression(with_value, expression.to_sql)
               end
 
-              Arel::Nodes::As.new Arel::Nodes::SqlLiteral.new(PG::Connection.quote_ident(name.to_s)), select
+              Arel::Nodes::As.new CtesInMyPg::SqlLiteral.new(PG::Connection.quote_ident(name.to_s)), select
             end
           when Arel::Nodes::As
             with_value
