@@ -1,12 +1,19 @@
 # CtesInMyPg
 
-[postgres_ext][1], a great gem, does not support Rails 5 yet.  
+[postgres_ext][1], a great gem, does not support Rails >= 5.
 
-Since I only ever use [CTEs][2] from that gem, I thought I'd rip out the code for that and put it in a separate gem to get CTEs working with Rails & ActiveRecord 5.
+Since I only ever used [CTEs][2] from that gem, I thought I'd rip out the code for that and put it in a separate gem to get CTEs working with Rails & ActiveRecord 5.
 
 ***All credit goes to [Dan McClain][3] and the postgres_ext contributors*** ... I just stole the code ... though I did remove `alias_method_chain`!
 
-[Now supports Rails 6!](https://github.com/kmurph73/ctes_in_my_pg/pull/4)
+Rails 6.1 support is on the [rails_6_1](https://github.com/kmurph73/ctes_in_my_pg/tree/rails_6_1) branch, which you can install via 
+```ruby
+gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg', branch: 'rails_6_1'
+```
+
+It's a somewhat hacky fix for 6.1, so I will investigate a more thorough solution, but it should hold us over until then.
+
+Those below Rails 6.1 can install via:
 
 ```ruby
 gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg'
