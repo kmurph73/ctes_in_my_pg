@@ -119,7 +119,7 @@ module ActiveRecord
 
     private
 
-      def build_arel(aliases)
+      def build_arel(aliases = nil)
         arel = super(aliases)
 
         build_with(arel) if @values[:with]
