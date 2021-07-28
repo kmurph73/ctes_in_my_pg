@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bourne', '~> 1.3.0'
 
   spec.add_dependency 'pg'
-  spec.add_dependency 'activerecord', '>= 6.1.0'
+  spec.add_dependency 'activerecord', '>= 6.1.4'
 
   spec.add_development_dependency 'm'
   spec.add_development_dependency 'database_cleaner'
