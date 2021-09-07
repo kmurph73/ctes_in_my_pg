@@ -11,7 +11,10 @@ Rails 6.1 support is on the [rails_6_1](https://github.com/kmurph73/ctes_in_my_p
 gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg', branch: 'rails_6_1'
 ```
 
-It's a somewhat hacky fix for 6.1, so I will investigate a more thorough solution, but it should hold us over until then.
+Rails 6.1.4 support is on the [rails_6_1_4](https://github.com/kmurph73/ctes_in_my_pg/tree/rails_6_1_4) branch:
+```ruby
+gem 'ctes_in_my_pg', github: 'kmurph73/ctes_in_my_pg', branch: 'rails_6_1_4'
+```
 
 Those below Rails 6.1 can install via:
 
